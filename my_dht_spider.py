@@ -163,12 +163,14 @@ class DHTServer(threading.Thread):
             else:
                 node = NODES.popleft()
                 REGISTRY.gauge('node.queue.size').set_value(len(NODES))
-                REGISTRY.meter('meter.find_noe').mark()
+                REGISTRY.meter('meter.send.find_node').mark()
                 self.find_node(node.nid, node.ip, node.port)
 
     def find_node(self, nid, ip, port):
+        transaction = entropy(2)
+
         query = {
-            "t": "aa",
+            "t": transaction,
             "y": "q",
             "q": "find_node",
             "a": {
@@ -228,15 +230,18 @@ class DHTServer(threading.Thread):
 
     def response_find_node(self, query_data, address):
         transaction = query_data['t']
+        infohash = query_data['a']['info_hash']
 
         node_bits = self.encode_nodes(8)
+        token = infohash[:TOKEN_LENGTH]
 
         response = {
             't': transaction,
             'y': 'r',
             'r': {
                 'id': self.nid,
-                'nodes': node_bits
+                'nodes': node_bits,
+                'token': token
             }
         }
 
