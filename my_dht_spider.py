@@ -5,6 +5,7 @@ import socket
 import time
 import collections
 import threading
+import os
 
 from hashlib import sha1
 from struct import unpack, pack
@@ -27,7 +28,7 @@ INTERVAL = 0.0005
 REGISTRY = global_registry()
 
 
-def entropy(length):
+def entropy(length=20):
     """Generate a hexadecimal string with input length
 
     Args:
@@ -38,13 +39,14 @@ def entropy(length):
     return "".join(chr(randint(0, 255)) for _ in xrange(length))
 
 
-def random_id():
+def random_id(size=20):
     """generate node id
 
     """
-    hash_method = sha1()
-    hash_method.update(entropy(20))
-    return hash_method.digest()
+    # hash_method = sha1()
+    # hash_method.update(entropy(20))
+    # return hash_method.digest()
+    return os.urandom(size)
 
 
 NID = random_id()
@@ -267,7 +269,7 @@ class DHTServer(threading.Thread):
             pass
 
 
-reporter = ConsoleReporter(reporting_interval=5)
+reporter = ConsoleReporter(reporting_interval=10)
 reporter.start()
 
 server = DHTServer()
