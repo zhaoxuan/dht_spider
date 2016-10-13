@@ -70,7 +70,10 @@ class DHTServer(threading.Thread):
         self.bind_ip = BIND_IP
 
     def send_krpc(self, msg, address):
-        self.ufd.sendto(bencode(msg), address)
+        try:
+            self.ufd.sendto(bencode(msg), address)
+        except Exception, e:
+            print 'Exception: ' + str(e)
 
     def run(self):
         while True:
@@ -82,7 +85,7 @@ class DHTServer(threading.Thread):
                 else:
                     continue
             except Exception, e:
-                # print 'Exception: ' + str(e)
+                print 'Exception: ' + str(e)
                 pass
 
     def process_message(self, msg, address):
