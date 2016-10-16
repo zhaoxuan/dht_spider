@@ -118,6 +118,9 @@ class DHTServer(threading.Thread):
                 pass
 
     def process_message(self, msg, address):
+        if 'y' not in msg:
+            return
+
         method = msg['y']
 
         if method == RESPONSE:
