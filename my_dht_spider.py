@@ -47,7 +47,7 @@ BIND_PORT = 6881
 MAX_NODE_SIZE = 1000
 NODES = collections.deque(maxlen=MAX_NODE_SIZE)
 TOKEN_LENGTH = 2
-INTERVAL = 0.5
+INTERVAL = 0.001
 REGISTRY = global_registry()
 
 
