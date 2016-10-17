@@ -147,10 +147,8 @@ class DHTServer(threading.Thread):
             if port < 1 or port > 65535:
                 continue
 
-            # n = KNode(nid, ip, port)
-            # NODES.append(n)
-            REGISTRY.meter('meter.send.ping').mark()
-            self.ping(self.nid, ip, port)
+            n = KNode(nid, ip, port)
+            NODES.append(n)
 
     def decode_nodes(self, nodes_bencode_data):
         """
@@ -196,21 +194,19 @@ class DHTServer(threading.Thread):
     def broadcast_self(self):
         while True:
             time.sleep(INTERVAL)
-            # if len(NODES) == 0:
-            #     self.find_node(self.nid, BOOT_NODE[0], BOOT_NODE[1])
-            # else:
-            #     node = NODES.popleft()
-            #     REGISTRY.gauge('node.queue.size').set_value(len(NODES))
-            #     REGISTRY.meter('meter.send.find_node').mark()
-            #     self.find_node(node.nid, node.ip, node.port)
-            for node in BOOTSTRAP_NODES:
+            if len(NODES) == 0:
+                for node in BOOTSTRAP_NODES:
+                    self.find_node(self.nid, node[0], node[1])
+            else:
+                node = NODES.popleft()
+                REGISTRY.gauge('node.queue.size').set_value(len(NODES))
                 REGISTRY.meter('meter.send.find_node').mark()
-                self.find_node(self.nid, node[0], node[1])
+                self.find_node(node.nid, node.ip, node.port)
 
     def find_node(self, nid, ip, port):
 
         query = {
-            "t": b"fn",
+            "t": "fn",
             "y": "q",
             "q": "find_node",
             "a": {
@@ -329,7 +325,7 @@ class DHTServer(threading.Thread):
             pass
 
 
-reporter = ConsoleReporter(reporting_interval=10)
+reporter = ConsoleReporter(reporting_interval=60)
 reporter.start()
 
 server = DHTServer()
