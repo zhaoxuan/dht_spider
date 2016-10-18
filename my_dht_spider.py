@@ -88,6 +88,12 @@ class RedisClient(object):
     def lpush(self, key, value):
         self.client.lpush(key, value)
 
+    def sadd(self, key, value):
+        self.client.sadd(key, value)
+
+
+RCLIENT = RedisClient()
+
 
 class KNode(object):
 
@@ -277,7 +283,9 @@ class DHTServer(threading.Thread):
             }
         }
 
-        # print proper_infohash(infohash)
+        magnet_hash = proper_infohash(infohash)
+        magnet = 'magnet:?xt=urn:btih:' + magnet_hash
+        RCLIENT.sadd('get_peers', magnet)
         REGISTRY.counter('response.get_peers').inc()
         self.send_krpc(response, address)
 
@@ -295,7 +303,10 @@ class DHTServer(threading.Thread):
             }
         }
 
-        print proper_infohash('magnet:?xt=urn:btih:' + infohash)
+        magnet_hash = proper_infohash(infohash)
+        magnet = 'magnet:?xt=urn:btih:' + magnet_hash
+        RCLIENT.sadd('announce_peer', magnet)
+
         REGISTRY.counter('response.announce_peer').inc()
         self.send_krpc(response, address)
 
