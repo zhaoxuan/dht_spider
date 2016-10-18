@@ -25,6 +25,7 @@ import collections
 import threading
 import traceback
 import binascii
+import redis
 
 from struct import unpack, pack
 from random import randint
@@ -77,6 +78,15 @@ def proper_infohash(infohash):
 
 
 NID = random_id()
+
+
+class RedisClient(object):
+    """docstring for RedisClient"""
+    def __init__(self):
+        self.client = redis.StrictRedis(host='localhost', port=6379, db=0)
+
+    def lpush(self, key, value):
+        self.client.lpush(key, value)
 
 
 class KNode(object):
@@ -285,7 +295,7 @@ class DHTServer(threading.Thread):
             }
         }
 
-        print proper_infohash(infohash)
+        print proper_infohash('magnet:?xt=urn:btih:' + infohash)
         REGISTRY.counter('response.announce_peer').inc()
         self.send_krpc(response, address)
 
